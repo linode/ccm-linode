@@ -67,6 +67,7 @@ func (f *fakeAPI) recordRequest(r *http.Request, urlPath string) {
 	}] = struct{}{}
 }
 
+//nolint:unparam
 func (f *fakeAPI) didRequestOccur(method, path, body string) bool {
 	_, ok := f.requests[fakeRequest{
 		Path:   path,
