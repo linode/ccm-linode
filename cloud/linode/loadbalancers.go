@@ -639,6 +639,18 @@ func (l *loadbalancers) createNodeBalancer(ctx context.Context, clusterName stri
 		Configs:            configs,
 		Tags:               tags,
 	}
+	if Options.NodeBalancerSubnetID != 0 {
+		ipv4Range := service.GetAnnotations()[annotations.NodeBalancerBackendIPv4Range]
+		if ipv4Range == "" {
+			return nil, fmt.Errorf("missing annotation %s", annotations.NodeBalancerBackendIPv4Range)
+		}
+		createOpts.VPCs = []*linodego.NodeBalancerVPCOptions{
+			{
+				SubnetID: Options.NodeBalancerSubnetID,
+				IPv4Range: ipv4Range,
+			},
+		}
+	}
 
 	fwid, ok := service.GetAnnotations()[annotations.AnnLinodeCloudFirewallID]
 	if ok {
@@ -798,7 +810,7 @@ func coerceString(s string, minLen, maxLen int, padding string) string {
 }
 
 func (l *loadbalancers) buildNodeBalancerNodeConfigRebuildOptions(node *v1.Node, nodePort int32) linodego.NodeBalancerConfigRebuildNodeOptions {
-	return linodego.NodeBalancerConfigRebuildNodeOptions{
+	nodeOptions := linodego.NodeBalancerConfigRebuildNodeOptions{
 		NodeBalancerNodeCreateOptions: linodego.NodeBalancerNodeCreateOptions{
 			Address: fmt.Sprintf("%v:%v", getNodePrivateIP(node), nodePort),
 			// NodeBalancer backends must be 3-32 chars in length
@@ -808,6 +820,10 @@ func (l *loadbalancers) buildNodeBalancerNodeConfigRebuildOptions(node *v1.Node,
 			Weight: 100,
 		},
 	}
+	if Options.NodeBalancerSubnetID != 0 {
+		nodeOptions.SubnetID = Options.NodeBalancerSubnetID
+	}
+	return nodeOptions
 }
 
 func (l *loadbalancers) retrieveKubeClient() error {

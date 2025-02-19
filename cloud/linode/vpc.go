@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/linode/linode-cloud-controller-manager/cloud/linode/client"
 	"github.com/linode/linodego"
@@ -15,7 +16,8 @@ import (
 var (
 	Mu sync.RWMutex
 	// vpcIDs map stores vpc id's for given vpc labels
-	vpcIDs = make(map[string]int, 0)
+	vpcIDs                = make(map[string]int, 0)
+	nodebalancerSubnetIDs = make(map[string]int, 0)
 )
 
 type vpcLookupError struct {
@@ -76,4 +78,42 @@ func GetVPCIPAddresses(ctx context.Context, client client.Client, vpcName string
 		return nil, err
 	}
 	return resp, nil
+}
+
+func GetNodeBalancerSubnetID(ctx context.Context, client client.Client, vpcName string) (int, error) {
+	vpcID, err := GetVPCID(ctx, client, strings.TrimSpace(vpcName))
+	if err != nil {
+		return 0, err
+	}
+
+	Mu.Lock()
+	defer Mu.Unlock()
+
+	// check if map contains subnet id for given VPC label
+	if subnetID, ok := nodebalancerSubnetIDs[vpcName]; ok {
+		return subnetID, nil
+	}
+	// if not, get all subnets and find the one with the given ipv4
+	subnets, err := client.ListVPCSubnets(ctx, vpcID, &linodego.ListOptions{})
+	if err != nil {
+		return 0, err
+	}
+	for _, subnet := range subnets {
+		if subnet.IPv4 == Options.NodeBalancerSubnet {
+			nodebalancerSubnetIDs[vpcName] = subnet.ID
+			return subnet.ID, nil
+		}
+	}
+	// if subnet not found, try creating it
+	subnetCreateOptions := linodego.VPCSubnetCreateOptions{
+		Label: fmt.Sprintf("nb-subnet-%d", time.Now().Unix()),
+		IPv4: Options.NodeBalancerSubnet,
+	}
+	subnet, err := client.CreateVPCSubnet(ctx, subnetCreateOptions, vpcID)
+	if err != nil {
+		klog.Errorf("failed creating nodebalancer subnet for vpc %s. Error: %s", vpcName, err.Error())
+		return 0, err
+	}
+	nodebalancerSubnetIDs[vpcName] = subnet.ID
+	return subnet.ID, nil
 }

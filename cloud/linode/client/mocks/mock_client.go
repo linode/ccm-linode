@@ -125,6 +125,21 @@ func (mr *MockClientMockRecorder) CreateNodeBalancerConfig(arg0, arg1, arg2 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNodeBalancerConfig", reflect.TypeOf((*MockClient)(nil).CreateNodeBalancerConfig), arg0, arg1, arg2)
 }
 
+// CreateVPCSubnet mocks base method.
+func (m *MockClient) CreateVPCSubnet(arg0 context.Context, arg1 linodego.VPCSubnetCreateOptions, arg2 int) (*linodego.VPCSubnet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateVPCSubnet", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*linodego.VPCSubnet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateVPCSubnet indicates an expected call of CreateVPCSubnet.
+func (mr *MockClientMockRecorder) CreateVPCSubnet(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVPCSubnet", reflect.TypeOf((*MockClient)(nil).CreateVPCSubnet), arg0, arg1, arg2)
+}
+
 // DeleteFirewall mocks base method.
 func (m *MockClient) DeleteFirewall(arg0 context.Context, arg1 int) error {
 	m.ctrl.T.Helper()
@@ -373,6 +388,21 @@ func (m *MockClient) ListVPCIPAddresses(arg0 context.Context, arg1 int, arg2 *li
 func (mr *MockClientMockRecorder) ListVPCIPAddresses(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVPCIPAddresses", reflect.TypeOf((*MockClient)(nil).ListVPCIPAddresses), arg0, arg1, arg2)
+}
+
+// ListVPCSubnets mocks base method.
+func (m *MockClient) ListVPCSubnets(arg0 context.Context, arg1 int, arg2 *linodego.ListOptions) ([]linodego.VPCSubnet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListVPCSubnets", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]linodego.VPCSubnet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListVPCSubnets indicates an expected call of ListVPCSubnets.
+func (mr *MockClientMockRecorder) ListVPCSubnets(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVPCSubnets", reflect.TypeOf((*MockClient)(nil).ListVPCSubnets), arg0, arg1, arg2)
 }
 
 // ListVPCs mocks base method.

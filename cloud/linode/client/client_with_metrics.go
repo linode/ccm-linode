@@ -111,6 +111,19 @@ func (_d ClientWithPrometheus) CreateNodeBalancerConfig(ctx context.Context, i1 
 	return _d.base.CreateNodeBalancerConfig(ctx, i1, n1)
 }
 
+// CreateVPCSubnet implements Client
+func (_d ClientWithPrometheus) CreateVPCSubnet(ctx context.Context, v1 linodego.VPCSubnetCreateOptions, i1 int) (vp1 *linodego.VPCSubnet, err error) {
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		ClientMethodCounterVec.WithLabelValues("CreateVPCSubnet", result).Inc()
+	}()
+	return _d.base.CreateVPCSubnet(ctx, v1, i1)
+}
+
 // DeleteFirewall implements Client
 func (_d ClientWithPrometheus) DeleteFirewall(ctx context.Context, fwid int) (err error) {
 	defer func() {
@@ -330,6 +343,19 @@ func (_d ClientWithPrometheus) ListVPCIPAddresses(ctx context.Context, i1 int, l
 		ClientMethodCounterVec.WithLabelValues("ListVPCIPAddresses", result).Inc()
 	}()
 	return _d.base.ListVPCIPAddresses(ctx, i1, lp1)
+}
+
+// ListVPCSubnets implements Client
+func (_d ClientWithPrometheus) ListVPCSubnets(ctx context.Context, i1 int, lp1 *linodego.ListOptions) (va1 []linodego.VPCSubnet, err error) {
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		ClientMethodCounterVec.WithLabelValues("ListVPCSubnets", result).Inc()
+	}()
+	return _d.base.ListVPCSubnets(ctx, i1, lp1)
 }
 
 // ListVPCs implements Client

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -46,6 +47,8 @@ var Options struct {
 	IpHolderSuffix        string
 	LinodeExternalNetwork *net.IPNet
 	NodeBalancerTags      []string
+	NodeBalancerSubnet    string
+	NodeBalancerSubnetID  int
 	GlobalStopChannel     chan<- struct{}
 }
 
@@ -130,6 +133,15 @@ func newCloud() (cloudprovider.Interface, error) {
 	if Options.VPCName != "" {
 		klog.Warningf("vpc-name flag is deprecated. Use vpc-names instead")
 		Options.VPCNames = Options.VPCName
+	}
+
+	if Options.VPCNames != "" && Options.NodeBalancerSubnet != "" {
+		vpc := strings.Split(Options.VPCNames, ",")[0]
+		subnetID, err := GetNodeBalancerSubnetID(context.TODO(), linodeClient, vpc)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get NodeBalancer subnet ID: %w", err)
+		}
+		Options.NodeBalancerSubnetID = subnetID
 	}
 
 	instanceCache = newInstances(linodeClient)
